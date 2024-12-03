@@ -1,0 +1,99 @@
+<mxfile host="app.diagrams.net" agent="Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36" version="25.0.1">
+  <diagram name="Page-1" id="5f0bae14-7c28-e335-631c-24af17079c00">
+    <mxGraphModel dx="261" dy="154" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1100" pageHeight="850" background="none" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-1" value="User" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="230" y="260" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-28" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="tYK1hFmC1QxgCnBuTLFP-2" target="tYK1hFmC1QxgCnBuTLFP-24">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-2" value="LLM" style="ellipse;whiteSpace=wrap;html=1;aspect=fixed;" vertex="1" parent="1">
+          <mxGeometry x="600" y="260" width="80" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-3" value="Tokenizer" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="400" y="260" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-10" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0;entryDx=0;entryDy=27.5;entryPerimeter=0;exitX=0.968;exitY=0.339;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" source="tYK1hFmC1QxgCnBuTLFP-1" target="tYK1hFmC1QxgCnBuTLFP-3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-13" value="Message" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-10">
+          <mxGeometry x="-0.0262" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-12" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0;exitDx=0;exitDy=52.5;exitPerimeter=0;entryX=0.945;entryY=0.66;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="tYK1hFmC1QxgCnBuTLFP-3" target="tYK1hFmC1QxgCnBuTLFP-1">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-14" value="Response" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-12">
+          <mxGeometry x="0.1054" y="-2" relative="1" as="geometry">
+            <mxPoint x="5" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-17" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.347;entryDx=0;entryDy=0;entryPerimeter=0;exitX=0.968;exitY=0.339;exitDx=0;exitDy=0;exitPerimeter=0;" edge="1" parent="1" target="tYK1hFmC1QxgCnBuTLFP-2">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="461" y="286.76" as="sourcePoint" />
+            <mxPoint x="554" y="287.76" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-18" value="Input Tensors &amp;amp; Mask" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-17">
+          <mxGeometry x="-0.0262" y="1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-22" value="Module" style="shape=or;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="260" width="60" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-25" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;exitX=0;exitY=0.5;exitDx=0;exitDy=0;" edge="1" parent="1" source="tYK1hFmC1QxgCnBuTLFP-24">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="460" y="310" as="targetPoint" />
+            <Array as="points">
+              <mxPoint x="590" y="390" />
+              <mxPoint x="590" y="310" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-26" value="&amp;nbsp;Output Tensors&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-25">
+          <mxGeometry x="0.2835" y="2" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-24" value="tool call" style="rhombus;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="610" y="360" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-27" value="no" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="580" y="360" width="40" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-29" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0;entryY=0.75;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="tYK1hFmC1QxgCnBuTLFP-24" target="tYK1hFmC1QxgCnBuTLFP-22">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-33" value="tool_function(**tool_args)" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-29">
+          <mxGeometry x="0.0981" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-30" value="yes" style="text;html=1;align=center;verticalAlign=middle;resizable=0;points=[];autosize=1;strokeColor=none;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="660" y="358" width="40" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-31" style="edgeStyle=orthogonalEdgeStyle;rounded=0;orthogonalLoop=1;jettySize=auto;html=1;entryX=0.5;entryY=0;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" target="tYK1hFmC1QxgCnBuTLFP-3">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="799" y="290" as="sourcePoint" />
+            <Array as="points">
+              <mxPoint x="799" y="291" />
+              <mxPoint x="730" y="291" />
+              <mxPoint x="730" y="200" />
+              <mxPoint x="430" y="200" />
+            </Array>
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="tYK1hFmC1QxgCnBuTLFP-32" value="&amp;nbsp;tool_result&amp;nbsp;" style="edgeLabel;html=1;align=center;verticalAlign=middle;resizable=0;points=[];" vertex="1" connectable="0" parent="tYK1hFmC1QxgCnBuTLFP-31">
+          <mxGeometry x="0.1418" y="-1" relative="1" as="geometry">
+            <mxPoint as="offset" />
+          </mxGeometry>
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

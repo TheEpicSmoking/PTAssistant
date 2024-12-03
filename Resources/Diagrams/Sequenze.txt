@@ -1,0 +1,12 @@
+https://sequencediagram.org/
+
+participant User
+participant LLM
+participant Scan Module
+
+User->LLM:"Hi"
+User<-LLM:"Hi, How can i Help you?"
+User->LLM:"Can you scan 127.0.0.1?"
+LLM-->Scan Module:Scan("127.0.0.1")
+LLM<--Scan Module:Port 631: Open
+User<-LLM:"127.0.0.1 has port 631 open!"
