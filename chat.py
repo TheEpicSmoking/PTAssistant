@@ -1,8 +1,8 @@
-import datetime
 import json
 import nmap
 import socket
 import whois
+import nvdlib
 from transformers import AutoModelForCausalLM, AutoTokenizer
 from colorama import Fore, Style, init
 
@@ -10,12 +10,17 @@ from colorama import Fore, Style, init
 init(autoreset=True)
 
 # Tools
-def Tell_Time():
+def cve_check(cveID: str):
     """
-    Questa funzione restituisce l'ora attuale.
+    Returns description and severity of a given CVE.
+
+    Args:
+        cveID: The CVE ID (e.g., 'CVE-2021-26855').
+    Returns:
+        Severity, Severity Score, CVE Description.
     """
-    now = datetime.datetime.now()
-    return now.strftime("%H:%M:%S")
+    cve = nvdlib.searchCVE(cveId=cveID)[0]
+    return ('Severity = ' + cve.v31severity + '\nSeverity Score = ' + str(cve.v31score) + '\nCVE Description = ' + cve.descriptions[0].value)
 
 def scan_target(target: str, scan_type: str = 'basic'):
     """
@@ -61,7 +66,7 @@ def scan_target(target: str, scan_type: str = 'basic'):
     return result
 
 # Mappa dei tool disponibili
-tools = [Tell_Time, scan_target]
+tools = [cve_check, scan_target]
 
 # Inizializzazione del modello
 model_name = "Qwen/Qwen2.5-1.5B-Instruct"
@@ -97,7 +102,7 @@ def chat_loop():
     global chat_history 
     while True:
         # Input dell'utente
-        user_input = input(f"{Fore.YELLOW}User: {Style.RESET_ALL}")
+        user_input = input(f"{Fore.GREEN}User: {Style.RESET_ALL}")
         if user_input.lower() in ["esci", "exit", "quit"]:
             print(f"{Fore.LIGHTBLACK_EX}Exit...{Style.RESET_ALL}")
             break
@@ -111,6 +116,7 @@ def chat_loop():
         # Verifica se è richiesta una chiamata a un tool
         if "<tool_call>" in response:
             # Estrarre il nome del tool dalla risposta
+            print(response)
             tool_call_start = response.find("<tool_call>") + len("<tool_call>")
             tool_call_end = response.find("</tool_call>")
             tool_call_content = response[tool_call_start:tool_call_end].strip()
@@ -131,6 +137,7 @@ def chat_loop():
                     
                     # Rigenerazione della risposta del modello con la cronologia aggiornata
                     response = model_response()
+                    print(tool_result)
                 else:
                     response = f"I'm sorry the tool '{tool_name}' is not available."
             except Exception as e:
@@ -138,7 +145,7 @@ def chat_loop():
         
         # Stampare la risposta senza tag inutili
         clean_response = response.replace("<|im_end|>", "").strip()
-        print(f"{Fore.GREEN}PTAssistant: {Style.RESET_ALL}{clean_response}")
+        print(f"{Fore.YELLOW}PTAssistant: {Style.RESET_ALL}{clean_response}")
 
 if __name__ == "__main__":
     chat_loop()
