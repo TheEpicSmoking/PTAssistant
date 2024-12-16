@@ -3,7 +3,7 @@ import nmap
 import socket
 import whois
 import nvdlib
-from transformers import AutoModelForCausalLM, AutoTokenizer
+from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
 from colorama import Fore, Style, init
 
 # Colorama
@@ -73,6 +73,7 @@ model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 print(f"{Fore.LIGHTBLACK_EX}Loading model...{Style.RESET_ALL}")
 tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
+steamer = TextStreamer(tokenizer)
 print(f"{Fore.LIGHTBLACK_EX}Model uploaded successfully.{Style.RESET_ALL}")
 
 # Inizializzazione della chat
@@ -82,6 +83,7 @@ chat_history = [
 
 def model_response():
     # Preparazione degli input per il modello
+    print(chat_history)
     inputs = tokenizer.apply_chat_template(
         chat_history, 
         tokenize=True, 
@@ -93,7 +95,7 @@ def model_response():
     inputs = {k: v.to(model.device) for k, v in inputs.items()}
     
     # Generazione della risposta
-    out = model.generate(**inputs, max_new_tokens=128)
+    out = model.generate(**inputs, max_new_tokens=128, streamer=steamer)
     response = tokenizer.decode(out[0][len(inputs["input_ids"][0]):]).strip()
     
     return response
