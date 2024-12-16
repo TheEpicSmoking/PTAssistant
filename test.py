@@ -36,17 +36,39 @@ def remove_lines_console(num_lines):
     for _ in range(num_lines):
         print("\x1b[A", end="\r", flush=True)
 
-def cve_check(cveID: str):
+def cve_check(cveID: str, more_info: bool = False):
     """
     Returns description and severity of a given CVE.
 
     Args:
         cveID: The CVE ID (e.g., 'CVE-2021-26855').
+        more_info: True for more details.
     Returns:
         Severity, Severity Score, CVE Description.
     """
-    cve = nvdlib.searchCVE(cveId=cveID)[0]
-    return ('Severity = ' + cve.v31severity + '\nSeverity Score = ' + str(cve.v31score) + '\nCVE Description = ' + cve.descriptions[0].value)
+    try:
+        cve = nvdlib.searchCVE(cveId=cveID)[0]
+        if more_info:
+           return ({"Severity": (str(cve.v31score) + " " + cve.v31severity),
+                    "Description": cve.descriptions[0].value,
+                    "Exploitability Score": cve.v31exploitability,
+                    "Impact Score": cve.v31impactScore,
+                    "Attack Vector": cve.v31attackVector,
+                    "Attack Complexity": cve.v31attackComplexity,
+                    "Privileges Required": cve.v31privilegesRequired,
+                    "User Interaction": cve.v31userInteraction,
+                    "Scope": cve.v31scope,
+                    "Confidentiality Impact": cve.v31confidentialityImpact,
+                    "Integrity Impact": cve.v31integrityImpact,
+                    "Availability Impact": cve.v31availabilityImpact})
+        else:
+            return ({"Severity": (str(cve.v31score) + " " + cve.v31severity),
+                    "Description": cve.descriptions[0].value,
+                    "Exploitability Score": cve.v31exploitability,
+                    "Impact Score": cve.v31impactScore})
+    except Exception as e:
+        print("CVE ID: ", cveID)
+        return ({"Tool Error: ": str(e)})
 
 tools = [cve_check]
 
@@ -144,7 +166,7 @@ class conchat:
         ).to("cpu")
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
-        inputs.update({"streamer": streamer, "max_new_tokens": 50})
+        inputs.update({"streamer": streamer, "max_new_tokens": 1024})
         try:
             thread = Thread(target=model.generate, kwargs=inputs)
             thread.start()
@@ -192,7 +214,8 @@ class conchat:
                                 chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
                                 chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
                                 #chat_history.append({"role": "system", "content": "Explain the tool output to the user."})
-                                print("too") 
+                                print("Tool call:", tool_call_content)
+                                print("Tool response:", tool_result)
                                 # Rigenerazione della risposta del modello con la cronologia aggiornata
                                 yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
                             else:
