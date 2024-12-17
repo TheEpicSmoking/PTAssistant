@@ -3,6 +3,7 @@ import json
 import time
 import os
 import nvdlib
+import re
 
 import requests
 from prompt_toolkit import PromptSession
@@ -36,41 +37,55 @@ def remove_lines_console(num_lines):
     for _ in range(num_lines):
         print("\x1b[A", end="\r", flush=True)
 
-def cve_check(cveID: str, more_info: bool = False):
+def cve_info(cve_ID: str):
     """
-    Returns description and severity of a given CVE.
+    Returns info and data about a given CVE. All scores are out of 10.
 
     Args:
-        cveID: The CVE ID (e.g., 'CVE-2021-26855').
-        more_info: True for more details.
+        cve_ID: The CVE ID'.
     Returns:
-        Severity, Severity Score, CVE Description.
+        Dictionary with CVE data, all scores returned are out of 10.
     """
     try:
-        cve = nvdlib.searchCVE(cveId=cveID)[0]
-        if more_info:
-           return ({"Severity": (str(cve.v31score) + " " + cve.v31severity),
-                    "Description": cve.descriptions[0].value,
-                    "Exploitability Score": cve.v31exploitability,
-                    "Impact Score": cve.v31impactScore,
-                    "Attack Vector": cve.v31attackVector,
-                    "Attack Complexity": cve.v31attackComplexity,
-                    "Privileges Required": cve.v31privilegesRequired,
-                    "User Interaction": cve.v31userInteraction,
-                    "Scope": cve.v31scope,
-                    "Confidentiality Impact": cve.v31confidentialityImpact,
-                    "Integrity Impact": cve.v31integrityImpact,
-                    "Availability Impact": cve.v31availabilityImpact})
-        else:
-            return ({"Severity": (str(cve.v31score) + " " + cve.v31severity),
-                    "Description": cve.descriptions[0].value,
-                    "Exploitability Score": cve.v31exploitability,
-                    "Impact Score": cve.v31impactScore})
+        cve_ID = cve_ID.strip()
+        
+        # Regular expression to match valid CVE ID format
+        valid_cve_regex = r"^CVE-\d{4}-\d{4,}$"
+        
+        # Check if the input is already valid
+        if not re.match(valid_cve_regex, cve_ID):
+        # Try to fix the format if possible
+        # Extract numbers using regex
+            match = re.findall(r"\d+", cve_ID)
+            if len(match) >= 2:
+                year = match[0]  # First number is the year
+                id_part = match[1]  # Second number is the CVE ID part
+                cve_ID = f"CVE-{year}-{id_part.zfill(4)}"  # Ensure at least 4 digits for the ID part
+            
+        cve = nvdlib.searchCVE(cveId=cve_ID)[0]
+        result = {
+            "CVE ID": cve_ID,
+            "Severity": str(getattr(cve, "v31score", "N/A")) + " " + getattr(cve, "v31severity", ""),
+            "Description": getattr(cve.descriptions[0], "value", "N/A"),
+            "Exploitability Score": getattr(cve, "v31exploitability", "N/A"),
+            "Impact Score": getattr(cve, "v31impactScore", "N/A"),
+            "Attack Vector": getattr(cve, "v31attackVector", "N/A"),
+            "Attack Complexity": getattr(cve, "v31attackComplexity", "N/A"),
+            "Privileges Required": getattr(cve, "v31privilegesRequired", "N/A"),
+            "User Interaction": getattr(cve, "v31userInteraction", "N/A"),
+            "Scope": getattr(cve, "v31scope", "N/A"),
+            "Confidentiality Impact": getattr(cve, "v31confidentialityImpact", "N/A"),
+            "Integrity Impact": getattr(cve, "v31integrityImpact", "N/A"),
+            "Availability Impact": getattr(cve, "v31availabilityImpact", "N/A"),
+        }
+        filtered_result = {key: value for key, value in result.items() if value.strip() != "N/A"}
+        return filtered_result
     except Exception as e:
-        print("CVE ID: ", cveID)
+        if "503 Server Error" in str(e):
+            chat_history.append({"role": "system", "content": "Try again to run the tool with the same args."})
         return ({"Tool Error: ": str(e)})
 
-tools = [cve_check]
+tools = [cve_info]
 
 def estimate_lines(text):
     columns, _ = os.get_terminal_size()
@@ -214,8 +229,6 @@ class conchat:
                                 chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
                                 chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
                                 #chat_history.append({"role": "system", "content": "Explain the tool output to the user."})
-                                print("Tool call:", tool_call_content)
-                                print("Tool response:", tool_result)
                                 # Rigenerazione della risposta del modello con la cronologia aggiornata
                                 yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
                             else:
