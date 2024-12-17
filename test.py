@@ -5,12 +5,13 @@ import os
 import nvdlib
 import re
 
-import requests
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.application import run_in_terminal
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+
 from rich.console import Console
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn
@@ -26,8 +27,7 @@ tokenizer = AutoTokenizer.from_pretrained(model_name)
 model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
 print(f"Model uploaded successfully.")
 chat_history = [
-    {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity."},
-    #{"role": "user", "content": "Hi, can you check the CVE-2021-26855 for me?"},
+    {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity, dont tell the user to update or secure their systems."},
 ]
 
 
@@ -37,12 +37,13 @@ def remove_lines_console(num_lines):
     for _ in range(num_lines):
         print("\x1b[A", end="\r", flush=True)
 
-def cve_info(cve_ID: str):
+def cve_info(cve_ID: str, second_attempt: bool=False):
     """
     Returns info and data about a given CVE. All scores are out of 10.
 
     Args:
         cve_ID: The CVE ID'.
+        second_attempt: Always False, used to prevent infinite recursion.
     Returns:
         Dictionary with CVE data, all scores returned are out of 10.
     """
@@ -78,12 +79,12 @@ def cve_info(cve_ID: str):
             "Integrity Impact": getattr(cve, "v31integrityImpact", "N/A"),
             "Availability Impact": getattr(cve, "v31availabilityImpact", "N/A"),
         }
-        filtered_result = {key: value for key, value in result.items() if value.strip() != "N/A"}
+        filtered_result = {key: value for key, value in result.items() if str(value).strip() != "N/A"}
         return filtered_result
     except Exception as e:
-        if "503 Server Error" in str(e):
-            chat_history.append({"role": "system", "content": "Try again to run the tool with the same args."})
-        return ({"Tool Error: ": str(e)})
+        if ("503 Server Error" in str(e) or "Read timed out." in str(e)) and not second_attempt:
+            cve_info(cve_ID, second_attempt=True)
+        return ({"Tool Error": str(e)})
 
 tools = [cve_info]
 
@@ -99,30 +100,10 @@ def estimate_lines(text):
     return line_count
 
 def handle_console_input(session: PromptSession) -> str:
-    return session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True).strip()
+    return session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
 
 class conchat:
-    def __init__(
-        self,
-        top_k=10,
-        top_p=0.95,
-        temperature=0.12,
-        n_predict=-1,
-        stream: bool = True,
-        cache_prompt: bool = True,
-        model_frame_color: str = "red",
-    ) -> None:
-        self.model_frame_color = model_frame_color
-        self.topk = top_k
-        self.top_p = top_p
-        self.temperature = temperature
-        self.n_predict = n_predict
-        self.stream = stream
-        self.cache_prompt = cache_prompt
-        self.headers = {"Content-Type": "application/json"}
-        self.chat_history = []
-        self.model_name = ""
-
+    def __init__(self) -> None:
         self.console = Console()
         self.session = PromptSession(key_bindings=self._create_keybindings(), history=FileHistory("chat_history.txt"))
         # TODO: Gracefully handle user input history file.
@@ -144,6 +125,10 @@ class conchat:
         @kb.add(Keys.ShiftUp)
         def _(event):
             event.app.current_buffer.insert_text("\n")  # Insert a newline
+
+        @kb.add(Keys.ControlL)
+        def _(event):
+            print(chat_history)        
 
         # Super (Command) + C to exit
         @kb.add(Keys.ControlC)
@@ -181,7 +166,7 @@ class conchat:
         ).to("cpu")
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
-        inputs.update({"streamer": streamer, "max_new_tokens": 1024})
+        inputs.update({"streamer": streamer, "max_new_tokens": 1024, "temperature": 0.17, "top_p": 0.92})
         try:
             thread = Thread(target=model.generate, kwargs=inputs)
             thread.start()
@@ -228,6 +213,9 @@ class conchat:
                                 # Aggiunta della chiamata al tool e del risultato alla cronologia
                                 chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
                                 chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
+                                if "System Message" in tool_result:
+                                    msg = json.loads(tool_result["System Message"])
+                                    chat_history.append(msg)
                                 #chat_history.append({"role": "system", "content": "Explain the tool output to the user."})
                                 # Rigenerazione della risposta del modello con la cronologia aggiornata
                                 yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
