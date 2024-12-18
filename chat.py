@@ -1,26 +1,130 @@
+import argparse
 import json
-import nmap
+import time
+import os
+import re
 import socket
+import nvdlib
+import nmap
 import whois
-import nvd_Test
-from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
-from colorama import Fore, Style, init
+from prompt_toolkit import PromptSession
+from prompt_toolkit.key_binding import KeyBindings
+from prompt_toolkit.keys import Keys
+from prompt_toolkit.history import FileHistory
+from prompt_toolkit.application import run_in_terminal
+from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
+from rich.console import Console
+from rich.live import Live
+from rich.progress import Progress, SpinnerColumn, TextColumn
+from rich.markdown import Markdown
+from threading import Thread
+from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 
-# Colorama
-init(autoreset=True)
+def exit_gracefully():
+    print("\nExiting...")
+    try:
+        exit()
+    except SystemExit:
+        os._exit(0)
 
-# Tools
-def cve_check(cveID: str):
+try:
+    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+    print(f"Loading model...")
+    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
+    print(f"Model uploaded successfully.")
+    chat_history = [
+        {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity, dont tell the user to update or secure their systems."},
+    ]
+except (KeyboardInterrupt, EOFError):
+    exit_gracefully()
+
+def get_attribute(cve, v31_attr, v2_attr):
+            return getattr(cve, v31_attr, getattr(cve, v2_attr, "N/A"))
+
+# TOOLS 
+def cve_more_info(cve_ID: str, second_attempt: bool=False):
     """
-    Returns description and severity of a given CVE.
+    Returns info and data about a given CVE. All scores are out of 10.
 
     Args:
-        cveID: The CVE ID (e.g., 'CVE-2021-26855').
+        cve_ID: The CVE ID.
+        second_attempt: Always False, used to prevent infinite recursion.
     Returns:
-        Severity, Severity Score, CVE Description.
+        Dictionary with CVE data, all scores returned are out of 10.
     """
-    cve = nvd_Test.searchCVE(cveId=cveID)[0]
-    return ('Severity = ' + cve.v31severity + '\nSeverity Score = ' + str(cve.v31score) + '\nCVE Description = ' + cve.descriptions[0].value)
+    try:
+        cve_ID = cve_ID.strip()
+        
+        # Regular expression to match valid CVE ID format
+        valid_cve_regex = r"^CVE-\d{4}-\d{4,}$"
+        
+        # Check if the input is already valid
+        if not re.match(valid_cve_regex, cve_ID):
+        # Try to fix the format if possible
+        # Extract numbers using regex
+            match = re.findall(r"\d+", cve_ID)
+            if len(match) >= 2:
+                year = match[0]  # First number is the year
+                id_part = match[1]  # Second number is the CVE ID part
+                cve_ID = f"CVE-{year}-{id_part.zfill(4)}"  # Ensure at least 4 digits for the ID part
+
+        cve = nvdlib.searchCVE(cveId=cve_ID)[0]
+        result = {
+            "CVE ID": cve.id,
+            "Severity": f"{get_attribute(cve, 'v31score', 'v2score')} {get_attribute(cve, 'v31severity', 'v2severity')}",
+            "Description": getattr(cve.descriptions[0], "value", "N/A"),
+            "Exploitability Score": get_attribute(cve, "v31exploitability", "v2exploitability"),
+            "Impact Score": get_attribute(cve, "v31impactScore", "v2impactScore"),
+            "Attack Vector": get_attribute(cve, "v31attackVector", "v2attackVector"),
+            "Attack Complexity": get_attribute(cve, "v31attackComplexity", "v2attackComplexity"),
+            "Privileges Required": get_attribute(cve, "v31privilegesRequired", "v2privilegesRequired"),
+            "User Interaction": get_attribute(cve, "v31userInteraction", "v2userInteraction"),
+            "Scope": get_attribute(cve, "v31scope", "v2scope"),
+            "Confidentiality Impact": get_attribute(cve, "v31confidentialityImpact", "v2confidentialityImpact"),
+            "Integrity Impact": get_attribute(cve, "v31integrityImpact", "v2integrityImpact"),
+            "Availability Impact": get_attribute(cve, "v31availabilityImpact", "v2availabilityImpact"),
+        }
+        filtered_result = {key: value for key, value in result.items() if str(value).strip() != "N/A"}
+        return filtered_result
+    except Exception as e:
+        if ("503 Server Error" in str(e) or "Read timed out." in str(e)) and not second_attempt:
+            cve_more_info(cve_ID, second_attempt=True)
+        return ({"Tool Error": str(e)})
+    
+def nvdlib_search(service_name: str, service_version: str = '', second_attempt: bool = False):
+        """
+        Returns lit of CVEs related to a given service.
+
+        Args:
+            service_name: The name of the service (e.g., 'Apache').
+            service_version: The version of the service (e.g., '1.0.0').
+            second_attempt: Always False, used to prevent infinite recursion.
+        Returns:
+            List of dictionaries with CVE data.
+        """
+        try:
+                cves = nvdlib.searchCVE(keywordSearch=(service_name.strip() + " " + service_version.strip()).strip(), limit=3)
+
+                response = []
+
+                for eachCVE in cves:
+                        #print((eachCVE.id + ": " + eachCVE.descriptions[0].value + "\n"))
+                        severity = get_attribute(eachCVE, 'v31severity', 'v2severity')
+                        security = get_attribute(eachCVE, 'v31score', 'v2score')
+                        response.append({"CVE ID": eachCVE.id, "Severity": severity, "Severity Score": security})
+                
+                if not response and service_version:
+                        service_version = ''
+                        return nvdlib_search(service_name)
+                else:
+                        response.append({"How To Give The Results": "Only the ID, severity and score, not additional text, even after."})
+                        return response
+
+        except Exception as e:
+                if ("503 Server Error" in str(e) or "Read timed out." in str(e)) and not second_attempt:
+                        return nvdlib_search(service_name, service_version, second_attempt=True)
+                return ({"Tool Error": str(e)})
 
 def scan_target(target: str, scan_type: str = 'basic'):
     """
@@ -61,93 +165,194 @@ def scan_target(target: str, scan_type: str = 'basic'):
         result['open_ports'] = open_ports
 
     except Exception as e:
-        result['error'] = str(e)
+        return ({"Tool Error": str(e)})
 
-    return result
+tools = [cve_more_info, scan_target, nvdlib_search]
 
-# Mappa dei tool disponibili
-tools = [cve_check, scan_target]
+def remove_lines_console(num_lines):
+    for _ in range(num_lines):
+        print("\x1b[A", end="\r", flush=True)
 
-# Inizializzazione del modello
-model_name = "Qwen/Qwen2.5-1.5B-Instruct"
-print(f"{Fore.LIGHTBLACK_EX}Loading model...{Style.RESET_ALL}")
-tokenizer = AutoTokenizer.from_pretrained(model_name)
-model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
-steamer = TextStreamer(tokenizer)
-print(f"{Fore.LIGHTBLACK_EX}Model uploaded successfully.{Style.RESET_ALL}")
+def estimate_lines(text):
+    columns, _ = os.get_terminal_size()
+    line_count = 1
+    text_lines = text.splt("\n")
+    for text_line in text_lines:
+        lines_needed = (len(text_line) // columns) + 1
 
-# Inizializzazione della chat
-chat_history = [
-    {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity."}
-]
+        line_count += lines_needed
 
-def model_response():
-    # Preparazione degli input per il modello
-    print(chat_history)
-    inputs = tokenizer.apply_chat_template(
-        chat_history, 
-        tokenize=True, 
-        add_generation_prompt=True,
-        tools=tools,
-        return_tensors="pt",
-        return_dict=True,
-    ).to("cpu")
-    inputs = {k: v.to(model.device) for k, v in inputs.items()}
-    
-    # Generazione della risposta
-    out = model.generate(**inputs, max_new_tokens=128, streamer=steamer)
-    response = tokenizer.decode(out[0][len(inputs["input_ids"][0]):]).strip()
-    
-    return response
+    return line_count
 
-def chat_loop():
-    global chat_history 
-    while True:
-        # Input dell'utente
-        user_input = input(f"{Fore.GREEN}User: {Style.RESET_ALL}")
-        if user_input.lower() in ["esci", "exit", "quit"]:
-            print(f"{Fore.LIGHTBLACK_EX}Exit...{Style.RESET_ALL}")
-            break
+def handle_console_input(session: PromptSession) -> str:
+    return session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
 
-        # Aggiunta del messaggio dell'utente alla cronologia
-        chat_history.append({"role": "user", "content": user_input})
-        
-        # Preparazione degli input per il modelloFunzione esempio del tool "Tell_Time"
-        response = model_response()
-        
-        # Verifica se è richiesta una chiamata a un tool
-        if "<tool_call>" in response:
-            # Estrarre il nome del tool dalla risposta
-            print(response)
-            tool_call_start = response.find("<tool_call>") + len("<tool_call>")
-            tool_call_end = response.find("</tool_call>")
-            tool_call_content = response[tool_call_start:tool_call_end].strip()
-            
+class conchat:
+    def __init__(self) -> None:
+        self.console = Console()
+        self.session = PromptSession(key_bindings=self._create_keybindings(), history=FileHistory("input.history"))
+
+
+    def _create_keybindings(self) -> KeyBindings:
+        kb = KeyBindings()
+
+        # Enter to submit the message
+        @kb.add(Keys.Enter)
+        def _(event):
+            if not event.app.current_buffer.text:  # Prevent sending an empty message
+                event.app.current_buffer.text = ""
+                return
+            if event.app.current_buffer.text:  # Check if there's content to send
+                event.app.current_buffer.validate_and_handle()  # Submit the input
+
+        # Shift + Enter for a new line
+        @kb.add(Keys.ShiftUp)
+        def _(event):
+            event.app.current_buffer.insert_text("\n")  # Insert a newline
+
+        # For debugging purposes
+        @kb.add(Keys.ControlL)
+        def _(event):
+            print(chat_history)        
+
+        # Super (Command) + C to exit
+        @kb.add(Keys.ControlC)
+        def _(event):
+            run_in_terminal(exit_gracefully)
+
+        return kb
+
+
+    def chat_generator(self, prompt=None):
+        if prompt:
+            chat_history.append({"role": "user", "content": prompt})
+
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            transient=True,  # Progress bar disappears after completion
+        ) as progress:
+            waiting_task = None
+            tool_call_buffer = ""  # Buffer for accumulating tool call content
+            inside_tool_call = False  # State tracking
+
+            streamer = TextIteratorStreamer(tokenizer) # Streamer here to refresh it each generation
+
+        inputs = tokenizer.apply_chat_template(
+            chat_history,
+            tools=tools,
+            tokenize=True, 
+            add_generation_prompt=True,
+            return_tensors="pt",
+            return_dict=True,
+        ).to("cpu")
+        inputs = {k: v.to(model.device) for k, v in inputs.items()}
+
+        inputs.update({"streamer": streamer, "max_new_tokens": 1524, "temperature": 0.17, "top_p": 0.92})
+        try:
+            thread = Thread(target=model.generate, kwargs=inputs)
+            thread.start()
+            for i, chunk in enumerate(streamer):
+                if i == 0: # Skip history chunk
+                    continue
+                #print(i, chunk)
+                
+                if "<|im_end|>" in chunk: # Remove the <|im_end|> token from the chunk
+                    chunk = chunk.replace("<|im_end|>", "").strip()
+
+                if "<tool_call>" in chunk:
+                    inside_tool_call = True
+                    tool_call_buffer = chunk[chunk.index("<tool_call>"):]  # Start buffering
+                    chunk = chunk[:chunk.index("<tool_call>")]  # Remove from regular chunk
+
+                    # Notify the user that a tool call is being constructed
+                    if waiting_task is None:
+                        waiting_task = progress.add_task(description="Calling the tool...", total=None)
+
+                # Continue buffering tool call content
+                if inside_tool_call:
+                    tool_call_buffer += chunk
+                    # Detect end of tool call
+                    if "</tool_call>" in chunk:
+                        inside_tool_call = False
+                        tool_call_buffer = tool_call_buffer.strip()
+
+                        # Notify the user that the tool is now running
+                        progress.update(waiting_task, description="Running the tool...")
+                        # Parse and execute the tool call
+                        try:
+                            # Extract tool call JSON and parse it
+                            tool_call_content = tool_call_buffer.replace("<tool_call>", "").replace("</tool_call>", "").strip()
+                            tool_data = json.loads(tool_call_content)
+                            tool_name = tool_data.get("name")
+                            tool_args = tool_data.get("arguments", {})
+
+                            func = globals()[tool_name]
+
+                            if func in tools:
+                                # Tool execution
+                                tool_result = func(**tool_args)
+                                # Add the tool call and result to the chat history
+                                chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
+                                chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
+                                # Add the system message to the chat history if present
+                                if "System Message" in tool_result:
+                                    chat_history.append({"role": "system", "content": tool_result["System Message"]})
+                                # Generate a response with the updated chat history
+                                yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
+                            else:
+                                chat_history.append({"role": "system", "content": tool_name + " is not a valid tool."})
+                        except json.JSONDecodeError as e:
+                            print(f"Error parsing tool call JSON: {e}")
+                            progress.remove_task(waiting_task)
+                            waiting_task = None
+
+                        # Clear tool call buffer
+                        tool_call_buffer = ""
+                    continue  # Skip processing this chunk further since it's part of the tool call
+
+
+                # Simulate streaming character by character
+                for char in chunk:
+                    time.sleep(0.05)
+                    yield {"choices": [{"delta": {"content": char}, "finish_reason": None}]}
+            yield {"choices": [{"delta": {}, "finish_reason": "stop"}]}
+            thread.join()
+        except Exception as e:
+            print(f"GeneratorError: {e}")
+
+    def response_handler(self, live: Live, prompt=None):
+        text = ""
+        block = "█ "
+        for token in self.chat_generator(prompt):
+            if "content" in token["choices"][0]["delta"]:
+                text += token["choices"][0]["delta"]["content"]
+            if token["choices"][0]["finish_reason"] == "tool_call":
+                self.response_handler(live)
+                break
+            if token["choices"][0]["finish_reason"] is not None:
+                block = ""
+            markdown = Markdown(text + block)
+            live.update(markdown, refresh=True)
+        if text:
+            chat_history.append({"role": "assistant", "content": text})
+
+    def handle_streaming(self, prompt=None):
+        self.console.print(Markdown("**>**"), end=" ")
+        with Live(console=self.console) as live:
+            self.response_handler(live, prompt)
+
+
+    def chat(self):
+        while True:
             try:
-                tool_call = json.loads(tool_call_content) 
-                tool_name = tool_call.get("name")
-                tool_args = tool_call.get("arguments", {})
-
-                func = globals()[tool_name]
-
-                if func in tools:
-                    # Esecuzione del tool
-                    tool_result = func(**tool_args)
-                    # Aggiunta della chiamata al tool e del risultato alla cronologia
-                    chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_call}]})
-                    chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
-                    
-                    # Rigenerazione della risposta del modello con la cronologia aggiornata
-                    response = model_response()
-                    print(tool_result)
-                else:
-                    response = f"I'm sorry the tool '{tool_name}' is not available."
-            except Exception as e:
-                response = f"Error when parsing the tool call: {e}"
-        
-        # Stampare la risposta senza tag inutili
-        clean_response = response.replace("<|im_end|>", "").strip()
-        print(f"{Fore.YELLOW}PTAssistant: {Style.RESET_ALL}{clean_response}")
+                user_m = handle_console_input(self.session)
+                self.handle_streaming(prompt=user_m)
+            except (KeyboardInterrupt, EOFError):
+                exit_gracefully()
+def main():
+    chat = conchat()
+    chat.chat()
 
 if __name__ == "__main__":
-    chat_loop()
+    main()
