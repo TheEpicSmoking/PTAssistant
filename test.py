@@ -3,26 +3,22 @@ import json
 import time
 import os
 import re
+import socket
 import nvdlib
 import nmap
-import socket
 import whois
-
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.application import run_in_terminal
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
-
 from rich.console import Console
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.markdown import Markdown
-
 from threading import Thread
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
-
 
 model_name = "Qwen/Qwen2.5-1.5B-Instruct"
 print(f"Loading model...")
@@ -36,10 +32,7 @@ chat_history = [
 def get_attribute(cve, v31_attr, v2_attr):
             return getattr(cve, v31_attr, getattr(cve, v2_attr, "N/A"))
 
-def remove_lines_console(num_lines):
-    for _ in range(num_lines):
-        print("\x1b[A", end="\r", flush=True)
-
+# TOOLS 
 def cve_more_info(cve_ID: str, second_attempt: bool=False):
     """
     Returns info and data about a given CVE. All scores are out of 10.
@@ -166,6 +159,10 @@ def scan_target(target: str, scan_type: str = 'basic'):
 
 tools = [cve_more_info, scan_target, nvdlib_search]
 
+def remove_lines_console(num_lines):
+    for _ in range(num_lines):
+        print("\x1b[A", end="\r", flush=True)
+
 def estimate_lines(text):
     columns, _ = os.get_terminal_size()
     line_count = 1
@@ -183,8 +180,7 @@ def handle_console_input(session: PromptSession) -> str:
 class conchat:
     def __init__(self) -> None:
         self.console = Console()
-        self.session = PromptSession(key_bindings=self._create_keybindings(), history=FileHistory("chat_history.txt"))
-        # TODO: Gracefully handle user input history file.
+        self.session = PromptSession(key_bindings=self._create_keybindings(), history=FileHistory("input.history"))
 
 
     def _create_keybindings(self) -> KeyBindings:
@@ -286,14 +282,15 @@ class conchat:
                             func = globals()[tool_name]
 
                             if func in tools:
-                                # Esecuzione del tool
+                                # Tool execution
                                 tool_result = func(**tool_args)
-                                # Aggiunta della chiamata al tool e del risultato alla cronologia
+                                # Add the tool call and result to the chat history
                                 chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
                                 chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
+                                # Add the system message to the chat history if present
                                 if "System Message" in tool_result:
                                     chat_history.append({"role": "system", "content": tool_result["System Message"]})
-                                # Rigenerazione della risposta del modello con la cronologia aggiornata
+                                # Generate a response with the updated chat history
                                 yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
                             else:
                                 chat_history.append({"role": "system", "content": tool_name + " is not a valid tool."})
@@ -342,11 +339,7 @@ class conchat:
         while True:
             try:
                 user_m = handle_console_input(self.session)
-                print(f"User input received: {user_m}")
                 self.handle_streaming(prompt=user_m)
-
-            # NOTE: Ctrl + c (keyboard) or Ctrl + d (eof) to exit
-            # Adding EOFError prevents an exception and gracefully exits.
             except (KeyboardInterrupt, EOFError):
                 exit()
 def main():
