@@ -1,4 +1,4 @@
 PTvenv
 console.py
 *.history
-nvd_Test.py
+*test.py
