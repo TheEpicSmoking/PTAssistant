@@ -2,7 +2,7 @@ import json
 import nmap
 import socket
 import whois
-import nvdlib
+import nvd_Test
 from transformers import AutoModelForCausalLM, AutoTokenizer, TextStreamer
 from colorama import Fore, Style, init
 
@@ -19,7 +19,7 @@ def cve_check(cveID: str):
     Returns:
         Severity, Severity Score, CVE Description.
     """
-    cve = nvdlib.searchCVE(cveId=cveID)[0]
+    cve = nvd_Test.searchCVE(cveId=cveID)[0]
     return ('Severity = ' + cve.v31severity + '\nSeverity Score = ' + str(cve.v31score) + '\nCVE Description = ' + cve.descriptions[0].value)
 
 def scan_target(target: str, scan_type: str = 'basic'):

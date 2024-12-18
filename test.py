@@ -2,8 +2,11 @@ import argparse
 import json
 import time
 import os
-import nvdlib
 import re
+import nvdlib
+import nmap
+import socket
+import whois
 
 from prompt_toolkit import PromptSession
 from prompt_toolkit.key_binding import KeyBindings
@@ -30,19 +33,19 @@ chat_history = [
     {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity, dont tell the user to update or secure their systems."},
 ]
 
-
-
+def get_attribute(cve, v31_attr, v2_attr):
+            return getattr(cve, v31_attr, getattr(cve, v2_attr, "N/A"))
 
 def remove_lines_console(num_lines):
     for _ in range(num_lines):
         print("\x1b[A", end="\r", flush=True)
 
-def cve_info(cve_ID: str, second_attempt: bool=False):
+def cve_more_info(cve_ID: str, second_attempt: bool=False):
     """
     Returns info and data about a given CVE. All scores are out of 10.
 
     Args:
-        cve_ID: The CVE ID'.
+        cve_ID: The CVE ID.
         second_attempt: Always False, used to prevent infinite recursion.
     Returns:
         Dictionary with CVE data, all scores returned are out of 10.
@@ -62,36 +65,111 @@ def cve_info(cve_ID: str, second_attempt: bool=False):
                 year = match[0]  # First number is the year
                 id_part = match[1]  # Second number is the CVE ID part
                 cve_ID = f"CVE-{year}-{id_part.zfill(4)}"  # Ensure at least 4 digits for the ID part
-            
+
         cve = nvdlib.searchCVE(cveId=cve_ID)[0]
         result = {
-            "CVE ID": cve_ID,
-            "Severity": str(getattr(cve, "v31score", "N/A")) + " " + getattr(cve, "v31severity", ""),
+            "CVE ID": cve.id,
+            "Severity": f"{get_attribute(cve, 'v31score', 'v2score')} {get_attribute(cve, 'v31severity', 'v2severity')}",
             "Description": getattr(cve.descriptions[0], "value", "N/A"),
-            "Exploitability Score": getattr(cve, "v31exploitability", "N/A"),
-            "Impact Score": getattr(cve, "v31impactScore", "N/A"),
-            "Attack Vector": getattr(cve, "v31attackVector", "N/A"),
-            "Attack Complexity": getattr(cve, "v31attackComplexity", "N/A"),
-            "Privileges Required": getattr(cve, "v31privilegesRequired", "N/A"),
-            "User Interaction": getattr(cve, "v31userInteraction", "N/A"),
-            "Scope": getattr(cve, "v31scope", "N/A"),
-            "Confidentiality Impact": getattr(cve, "v31confidentialityImpact", "N/A"),
-            "Integrity Impact": getattr(cve, "v31integrityImpact", "N/A"),
-            "Availability Impact": getattr(cve, "v31availabilityImpact", "N/A"),
+            "Exploitability Score": get_attribute(cve, "v31exploitability", "v2exploitability"),
+            "Impact Score": get_attribute(cve, "v31impactScore", "v2impactScore"),
+            "Attack Vector": get_attribute(cve, "v31attackVector", "v2attackVector"),
+            "Attack Complexity": get_attribute(cve, "v31attackComplexity", "v2attackComplexity"),
+            "Privileges Required": get_attribute(cve, "v31privilegesRequired", "v2privilegesRequired"),
+            "User Interaction": get_attribute(cve, "v31userInteraction", "v2userInteraction"),
+            "Scope": get_attribute(cve, "v31scope", "v2scope"),
+            "Confidentiality Impact": get_attribute(cve, "v31confidentialityImpact", "v2confidentialityImpact"),
+            "Integrity Impact": get_attribute(cve, "v31integrityImpact", "v2integrityImpact"),
+            "Availability Impact": get_attribute(cve, "v31availabilityImpact", "v2availabilityImpact"),
         }
         filtered_result = {key: value for key, value in result.items() if str(value).strip() != "N/A"}
         return filtered_result
     except Exception as e:
         if ("503 Server Error" in str(e) or "Read timed out." in str(e)) and not second_attempt:
-            cve_info(cve_ID, second_attempt=True)
+            cve_more_info(cve_ID, second_attempt=True)
+        return ({"Tool Error": str(e)})
+    
+def nvdlib_search(service_name: str, service_version: str = '', second_attempt: bool = False):
+        """
+        Returns lit of CVEs related to a given service.
+
+        Args:
+            service_name: The name of the service (e.g., 'Apache').
+            service_version: The version of the service (e.g., '1.0.0').
+            second_attempt: Always False, used to prevent infinite recursion.
+        Returns:
+            List of dictionaries with CVE data.
+        """
+        try:
+                cves = nvdlib.searchCVE(keywordSearch=(service_name.strip() + " " + service_version.strip()).strip(), limit=3)
+
+                response = []
+
+                for eachCVE in cves:
+                        #print((eachCVE.id + ": " + eachCVE.descriptions[0].value + "\n"))
+                        severity = get_attribute(eachCVE, 'v31severity', 'v2severity')
+                        security = get_attribute(eachCVE, 'v31score', 'v2score')
+                        response.append({"CVE ID": eachCVE.id, "Severity": severity, "Severity Score": security})
+                
+                if not response and service_version:
+                        service_version = ''
+                        return nvdlib_search(service_name)
+                else:
+                        response.append({"How To Give The Results": "Only the ID, severity and score, not additional text, even after."})
+                        return response
+
+        except Exception as e:
+                if ("503 Server Error" in str(e) or "Read timed out." in str(e)) and not second_attempt:
+                        return nvdlib_search(service_name, service_version, second_attempt=True)
+                return ({"Tool Error": str(e)})
+
+def scan_target(target: str, scan_type: str = 'basic'):
+    """
+    Performs a scan on a given target.
+
+    Args:
+        target: The target IP or domain (127.0.0.1).
+        scan_type: The type of scan to perform ('basic', 'aggressive').
+    Returns:
+        Dictionary with scan results.
+    """
+    result = {}
+    try:
+        # Nmap Scan
+        nm = nmap.PortScanner()
+        if scan_type == 'basic':
+            nm.scan(target, arguments='-sS')
+        elif scan_type == 'aggressive':
+            nm.scan(target, arguments='-A')
+        
+        result['nmap'] = nm[target] if target in nm.all_hosts() else 'No information found'
+
+        # Whois lookup
+        try:
+            domain_info = whois.whois(target)
+            result['whois'] = domain_info
+        except Exception as e:
+            result['whois'] = f"WHOIS lookup failed: {e}"
+
+        # Basic socket check
+        ports = [80, 443]
+        open_ports = []
+        for port in ports:
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+                sock.settimeout(2)
+                if not sock.connect_ex((target, port)):
+                    open_ports.append(port)
+        result['open_ports'] = open_ports
+
+    except Exception as e:
         return ({"Tool Error": str(e)})
 
-tools = [cve_info]
+tools = [cve_more_info, scan_target, nvdlib_search]
 
 def estimate_lines(text):
     columns, _ = os.get_terminal_size()
     line_count = 1
-    text_lines = text.split("\n")
+    text_lines = text.splt("\n")
     for text_line in text_lines:
         lines_needed = (len(text_line) // columns) + 1
 
@@ -166,7 +244,7 @@ class conchat:
         ).to("cpu")
         inputs = {k: v.to(model.device) for k, v in inputs.items()}
 
-        inputs.update({"streamer": streamer, "max_new_tokens": 1024, "temperature": 0.17, "top_p": 0.92})
+        inputs.update({"streamer": streamer, "max_new_tokens": 1524, "temperature": 0.17, "top_p": 0.92})
         try:
             thread = Thread(target=model.generate, kwargs=inputs)
             thread.start()
@@ -214,13 +292,11 @@ class conchat:
                                 chat_history.append({"role": "assistant", "tool_calls": [{"type": "function", "function": tool_data}]})
                                 chat_history.append({"role": "tool", "name": tool_name, "content": tool_result})
                                 if "System Message" in tool_result:
-                                    msg = json.loads(tool_result["System Message"])
-                                    chat_history.append(msg)
-                                #chat_history.append({"role": "system", "content": "Explain the tool output to the user."})
+                                    chat_history.append({"role": "system", "content": tool_result["System Message"]})
                                 # Rigenerazione della risposta del modello con la cronologia aggiornata
                                 yield {"choices": [{"delta": {}, "finish_reason": "tool_call"}]}
                             else:
-                                response = f"I'm sorry the tool '{tool_name}' is not available."
+                                chat_history.append({"role": "system", "content": tool_name + " is not a valid tool."})
                         except json.JSONDecodeError as e:
                             print(f"Error parsing tool call JSON: {e}")
                             progress.remove_task(waiting_task)
