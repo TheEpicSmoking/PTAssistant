@@ -1,4 +1,3 @@
-import argparse
 import json
 import time
 import os
@@ -7,36 +6,42 @@ import socket
 import nvdlib
 import nmap
 import whois
-from prompt_toolkit import PromptSession
+from prompt_toolkit import PromptSession, HTML
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.history import FileHistory
 from prompt_toolkit.application import run_in_terminal
 from prompt_toolkit.auto_suggest import AutoSuggestFromHistory
 from rich.console import Console
+from rich.errors import LiveError
 from rich.live import Live
-from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.markdown import Markdown
+from rich.spinner import Spinner
 from threading import Thread
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 
-def exit_gracefully():
-    print("\nExiting...")
+def exit_gracefully(second_time: bool = False):
+    with consolex.status("[bold red]Exiting", spinner="dots") as status:
+        try:
+            if not second_time:
+                time.sleep(1)
+        except (LiveError, KeyboardInterrupt, EOFError):
+            exit_gracefully(True)
     try:
         exit()
     except SystemExit:
         os._exit(0)
 
 try:
-    model_name = "Qwen/Qwen2.5-1.5B-Instruct"
-    print(f"Loading model...")
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
-    model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
-    print(f"Model uploaded successfully.")
-    chat_history = [
+    consolex = Console()
+    with consolex.status("[bold green]Booting[/bold green]", spinner="dots") as status:
+        model_name = "Qwen/Qwen2.5-1.5B-Instruct"
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        model = AutoModelForCausalLM.from_pretrained(model_name, device_map="cpu")
+        chat_history = [
         {"role": "system", "content": "You are a useful chatbot expert in the matter of cybersecurity, dont tell the user to update or secure their systems."},
-    ]
-except (KeyboardInterrupt, EOFError):
+        ]
+except (LiveError, ValueError, KeyboardInterrupt, EOFError):
     exit_gracefully()
 
 def get_attribute(cve, v31_attr, v2_attr):
@@ -164,6 +169,7 @@ def scan_target(target: str, scan_type: str = 'basic'):
                     open_ports.append(port)
         result['open_ports'] = open_ports
 
+        return result
     except Exception as e:
         return ({"Tool Error": str(e)})
 
@@ -185,7 +191,7 @@ def estimate_lines(text):
     return line_count
 
 def handle_console_input(session: PromptSession) -> str:
-    return session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
+    return session.prompt(HTML("<b><ansigreen>User: </ansigreen></b>"), multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
 
 class conchat:
     def __init__(self) -> None:
@@ -205,38 +211,27 @@ class conchat:
             if event.app.current_buffer.text:  # Check if there's content to send
                 event.app.current_buffer.validate_and_handle()  # Submit the input
 
-        # Shift + Enter for a new line
-        @kb.add(Keys.ShiftUp)
-        def _(event):
-            event.app.current_buffer.insert_text("\n")  # Insert a newline
-
         # For debugging purposes
         @kb.add(Keys.ControlL)
         def _(event):
             print(chat_history)        
 
-        # Super (Command) + C to exit
-        @kb.add(Keys.ControlC)
+        # Ctrl + Q to exit
+        @kb.add("c-q")
         def _(event):
             run_in_terminal(exit_gracefully)
 
         return kb
 
 
-    def chat_generator(self, prompt=None):
+    def chat_generator(self, prompt=None, live: Live=None):
         if prompt:
             chat_history.append({"role": "user", "content": prompt})
 
-        with Progress(
-            SpinnerColumn(),
-            TextColumn("[progress.description]{task.description}"),
-            transient=True,  # Progress bar disappears after completion
-        ) as progress:
-            waiting_task = None
-            tool_call_buffer = ""  # Buffer for accumulating tool call content
-            inside_tool_call = False  # State tracking
+        tool_call_buffer = ""  # Buffer for accumulating tool call content
+        inside_tool_call = False  # State tracking
 
-            streamer = TextIteratorStreamer(tokenizer) # Streamer here to refresh it each generation
+        streamer = TextIteratorStreamer(tokenizer) # Streamer here to refresh it each generation
 
         inputs = tokenizer.apply_chat_template(
             chat_history,
@@ -265,20 +260,20 @@ class conchat:
                     tool_call_buffer = chunk[chunk.index("<tool_call>"):]  # Start buffering
                     chunk = chunk[:chunk.index("<tool_call>")]  # Remove from regular chunk
 
-                    # Notify the user that a tool call is being constructed
-                    if waiting_task is None:
-                        waiting_task = progress.add_task(description="Calling the tool...", total=None)
+                    spinner = Spinner("dots", text="[yellow]Calling the tool...")
+                    live.update(spinner, refresh=True)
 
                 # Continue buffering tool call content
                 if inside_tool_call:
                     tool_call_buffer += chunk
                     # Detect end of tool call
                     if "</tool_call>" in chunk:
+                        spinner = Spinner("dots", text="[yellow]Processing...")
+                        live.update(spinner, refresh=True)
                         inside_tool_call = False
                         tool_call_buffer = tool_call_buffer.strip()
 
                         # Notify the user that the tool is now running
-                        progress.update(waiting_task, description="Running the tool...")
                         # Parse and execute the tool call
                         try:
                             # Extract tool call JSON and parse it
@@ -304,8 +299,6 @@ class conchat:
                                 chat_history.append({"role": "system", "content": tool_name + " is not a valid tool."})
                         except json.JSONDecodeError as e:
                             print(f"Error parsing tool call JSON: {e}")
-                            progress.remove_task(waiting_task)
-                            waiting_task = None
 
                         # Clear tool call buffer
                         tool_call_buffer = ""
@@ -324,7 +317,8 @@ class conchat:
     def response_handler(self, live: Live, prompt=None):
         text = ""
         block = "█ "
-        for token in self.chat_generator(prompt):
+        
+        for token in self.chat_generator(prompt, live):
             if "content" in token["choices"][0]["delta"]:
                 text += token["choices"][0]["delta"]["content"]
             if token["choices"][0]["finish_reason"] == "tool_call":
@@ -332,14 +326,13 @@ class conchat:
                 break
             if token["choices"][0]["finish_reason"] is not None:
                 block = ""
-            markdown = Markdown(text + block)
+            markdown = Markdown("**PTAssistant:** " + text + block)
             live.update(markdown, refresh=True)
         if text:
             chat_history.append({"role": "assistant", "content": text})
 
     def handle_streaming(self, prompt=None):
-        self.console.print(Markdown("**>**"), end=" ")
-        with Live(console=self.console) as live:
+        with Live(console=self.console, vertical_overflow="visible") as live:
             self.response_handler(live, prompt)
 
 
@@ -348,7 +341,7 @@ class conchat:
             try:
                 user_m = handle_console_input(self.session)
                 self.handle_streaming(prompt=user_m)
-            except (KeyboardInterrupt, EOFError):
+            except (LiveError, KeyboardInterrupt, EOFError):
                 exit_gracefully()
 def main():
     chat = conchat()
