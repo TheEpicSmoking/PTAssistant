@@ -17,6 +17,12 @@ from rich.console import Console
 from rich.live import Live
 from rich.progress import Progress, SpinnerColumn, TextColumn
 from rich.markdown import Markdown
+from rich.table import Table
+from rich.panel import Panel
+from rich.text import Text
+from rich import box
+from rich.layout import Layout
+from rich.align import Align
 from threading import Thread
 from transformers import AutoTokenizer, AutoModelForCausalLM, TextIteratorStreamer
 
@@ -27,7 +33,7 @@ def exit_gracefully():
     except SystemExit:
         os._exit(0)
 
-try:
+try:   
     model_name = "Qwen/Qwen2.5-1.5B-Instruct"
     print(f"Loading model...")
     tokenizer = AutoTokenizer.from_pretrained(model_name)
@@ -185,7 +191,8 @@ def estimate_lines(text):
     return line_count
 
 def handle_console_input(session: PromptSession) -> str:
-    return session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
+    message = session.prompt("(Prompt: ⌥ + ⏎) | (Exit: ⌘ + c): ", multiline=True, auto_suggest=AutoSuggestFromHistory()).strip()
+    return message
 
 class conchat:
     def __init__(self) -> None:
@@ -321,10 +328,41 @@ class conchat:
         except Exception as e:
             print(f"GeneratorError: {e}")
 
+    def render_chat(self, chat):
+        table = Table.grid(expand=True)
+        table.add_column(ratio=0.10)
+        table.add_column(ratio=1)
+        table.add_column(ratio=1)
+        table.add_column(ratio=0.10)
+
+        for message in chat:
+            if (message["role"] == "assistant") and ("content" in message):
+
+                markdown = Markdown(message["content"], style="white")
+                table.add_row("",Align(Panel(
+                                        markdown,
+                                        style="yellow", 
+                                        title = "[yellow1]PenTesting Assistant",
+                                        subtitle="[yellow1]"+model_name,
+                                        expand=False,
+                                        title_align="left",
+                                        subtitle_align= "right",
+                                        box=box.ROUNDED,), align="left"),"","")
+            elif message["role"] == "user":
+
+                markdown = Markdown(message["content"], style = "white")
+                table.add_row("","",Align(Panel(markdown,
+                                            style="green",
+                                            title = "[green1]You",
+                                            title_align="right",
+                                            expand=True), align="right"),"")
+        return table
+  
     def response_handler(self, live: Live, prompt=None):
         text = ""
         block = "█ "
-        for token in self.chat_generator(prompt):
+        self.console.clear()
+        for i, token in enumerate(self.chat_generator(prompt)):
             if "content" in token["choices"][0]["delta"]:
                 text += token["choices"][0]["delta"]["content"]
             if token["choices"][0]["finish_reason"] == "tool_call":
@@ -332,22 +370,18 @@ class conchat:
                 break
             if token["choices"][0]["finish_reason"] is not None:
                 block = ""
-            markdown = Markdown(text + block)
-            live.update(markdown, refresh=True)
-        if text:
-            chat_history.append({"role": "assistant", "content": text})
-
-    def handle_streaming(self, prompt=None):
-        self.console.print(Markdown("**>**"), end=" ")
-        with Live(console=self.console) as live:
-            self.response_handler(live, prompt)
-
-
+            if i > 0:
+                chat_history.pop()
+            chat_history.append({"role": "assistant", "content": text + block})
+            live.update(self.render_chat(chat_history), refresh=True)
+    
     def chat(self):
         while True:
             try:
-                user_m = handle_console_input(self.session)
-                self.handle_streaming(prompt=user_m)
+                with Live(console=self.console, vertical_overflow="crop") as live:
+                    user_m = handle_console_input(self.session, live=live)
+                    self.response_handler(prompt=user_m, live=live)
+                    
             except (KeyboardInterrupt, EOFError):
                 exit_gracefully()
 def main():
