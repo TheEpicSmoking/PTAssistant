@@ -7,6 +7,6 @@ Attualmente il modello viene runnato in locale, si immagina un hosting in futuro
 la repository include tutti i materiali legati al progetto.
 
 # Branch
-**no-ui:** Questo è il branch principale per il progetto relativo all'esame di Ingegneria del Software.
-**source/main:** Questo branch rappresenta il punto di partenza per lo sviluppo del progetto al di fuori del contesto dell'esame. Qui verranno introdotte nuove funzionalità e miglioramenti futuri.
+  - **no-ui:** Questo è il branch principale per il progetto relativo all'esame di Ingegneria del Software.
+  - **source/main:** Questo branch rappresenta il punto di partenza per lo sviluppo del progetto al di fuori del contesto dell'esame. Qui verranno introdotte nuove funzionalità e miglioramenti futuri.
 
