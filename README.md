@@ -8,7 +8,6 @@ Presentazioni
 Codice sorgente
 Documentazione
 
-#Branch
 **no-ui:** Questo è il branch principale per il progetto relativo all'esame di Ingegneria del Software.
 
 **source/main:*** Questo branch rappresenta il punto di partenza per lo sviluppo del progetto al di fuori del contesto dell'esame. Qui verranno introdotte nuove funzionalità e miglioramenti futuri.
