@@ -62,7 +62,7 @@ fase di penetration testing\autocite{app13126986} fornendo un'esperienza interat
 Nel panorama attuale della cybersecurity, l’intelligenza artificiale ha assunto un
 ruolo sempre più centrale\autocite{Princess_Egbuna_2021}\autocite{zhang2024llmsmeetcybersecuritysystematic}, con modelli avanzati che supportano analisi delle minacce, 
 rilevamento delle vulnerabilità e simulazioni di attacchi\autocite{GetPwnd2023}. Molte soluzioni disponibili 
-sul mercato fanno uso di modelli altamente specializzati, addestrati su dataset specifici 
+sul mercato come \href{https://www.pentestgpt.ai/}{PentestGPT}, fanno uso di modelli altamente specializzati, addestrati su dataset specifici 
 relativi alla sicurezza informatica, che garantiscono performance ottimizzate. 
 Tuttavia, questi strumenti presentano spesso delle limitazioni, come la necessità 
 di accedere a servizi remoti, restrizioni nel numero di richieste effettuabili e costi 
@@ -124,7 +124,7 @@ Il fine-tuning di un modello da 1.5B parametri è un processo computazionalmente
 che richiede hardware e risorse software specifiche\autocite{j2024finetuningllmenterprise}:
 \begin{itemize}
     \item \textbf{GPU con almeno 24 GB di VRAM:} quantità minima necessaria per 
-    gestire il training in batch ragionevoliS.
+    gestire il training in batch ragionevoli.
     \item \textbf{CPU potente:} per gestire il pre-processing dei dati e il training in parallelo.
     \item \textbf{Ampio spazio di archiviazione:} per caricare dataset e checkpoint intermedi.
 \end{itemize}
@@ -181,10 +181,10 @@ i tempi di attesa superavano il minuto, rendendo l'esperienza utente non ottimal
 Dopo aver analizzato attentamente i limiti del prototipo, sono state effettuate numerose migliorie
 all'esperienza utente, tra cui un'interfaccia grafica molto più pulita che permette
 al modello di formattare le risposte, l'aggiunta di un sistema di cronologia in modo che l'utente
-possa automaticamente ripetere comandi passati più facilmente, e la completa rivisitazione del
-sistema che gestiva l'input e l'output del modello, per permette di vedere in tempo reale i messaggi
+possa automaticamente ripetere comandi passati, e la completa rivisitazione del
+sistema che gestisce l'input e l'output, per permette di vedere in tempo reale i messaggi
 del modello, riducendo notevolmente i tempi di attesa.\\
-Oltre a questo sono state aggiunte nuove funzionalità come la ricerca di CVE tramite NVD e resa più
+Oltre a questo sono state aggiunte nuove funzionalità come la ricerca di CVE su \href{https://nvd.nist.gov/}{NVD} e resa più
 efficace l'integrazione con nmap.\\
 \begin{figure}[H]
     \centering
@@ -199,7 +199,7 @@ efficace l'integrazione con nmap.\\
 \section{Sviluppi Futuri}
 Gli sviluppi futuri del progetto mirano a potenziarne ulteriormente le funzionalità e 
 migliorare l’esperienza utente.
-È previsto l’aggiungimento di nuovi moduli, come un Modulo 
+È prevista l'aggiunta di nuovi moduli, come un Modulo 
 di Attacco, che suggerirà exploit e tecniche di attacco specifiche per le vulnerabilità 
 rilevate, e un Modulo di Report, capace di generare report dettagliati e professionali 
 utili per la documentazione del lavoro svolto.\\
