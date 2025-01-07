@@ -1,0 +1,15 @@
+\contentsline {section}{\numberline {1}Introduzione}{2}{section.1}%
+\contentsline {section}{\numberline {2}Contesto e stato dell'arte}{2}{section.2}%
+\contentsline {section}{\numberline {3}Requisiti}{2}{section.3}%
+\contentsline {subsection}{\numberline {3.1}Funzionali}{2}{subsection.3.1}%
+\contentsline {subsection}{\numberline {3.2}Non Funzionali}{2}{subsection.3.2}%
+\contentsline {section}{\numberline {4}Modello di processo}{3}{section.4}%
+\contentsline {section}{\numberline {5}Analisi dei Costi}{3}{section.5}%
+\contentsline {subsection}{\numberline {5.1}Hosting del modello}{3}{subsection.5.1}%
+\contentsline {subsection}{\numberline {5.2}Fine-tuning del modello}{4}{subsection.5.2}%
+\contentsline {subsubsection}{\numberline {5.2.1}In locale}{4}{subsubsection.5.2.1}%
+\contentsline {subsubsection}{\numberline {5.2.2}In Cloud}{4}{subsubsection.5.2.2}%
+\contentsline {section}{\numberline {6}Problemi riscontrati e Scelte tecniche}{4}{section.6}%
+\contentsline {section}{\numberline {7}Prototipo}{5}{section.7}%
+\contentsline {section}{\numberline {8}Stato Attuale}{5}{section.8}%
+\contentsline {section}{\numberline {9}Sviluppi Futuri}{7}{section.9}%

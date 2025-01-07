@@ -1,0 +1,380 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{nty/global//global/global}
+    \entry{app13126986}{article}{}
+      \name{author}{2}{}{%
+        {{hash=5f1993280d244ec4399d1fd9abc5497c}{%
+           family={Alhamed},
+           familyi={A\bibinitperiod},
+           given={Mariam},
+           giveni={M\bibinitperiod}}}%
+        {{hash=231b1426d62de449cb355e71c21db450}{%
+           family={Rahman},
+           familyi={R\bibinitperiod},
+           given={M.\bibnamedelimi M.\bibnamedelimi Hafizur},
+           giveni={M\bibinitperiod\bibinitdelim M\bibinitperiod\bibinitdelim H\bibinitperiod}}}%
+      }
+      \strng{namehash}{f27a4a3d782ea8052d89118601fbd355}
+      \strng{fullhash}{f27a4a3d782ea8052d89118601fbd355}
+      \strng{bibnamehash}{f27a4a3d782ea8052d89118601fbd355}
+      \strng{authorbibnamehash}{f27a4a3d782ea8052d89118601fbd355}
+      \strng{authornamehash}{f27a4a3d782ea8052d89118601fbd355}
+      \strng{authorfullhash}{f27a4a3d782ea8052d89118601fbd355}
+      \field{sortinit}{A}
+      \field{sortinithash}{2f401846e2029bad6b3ecc16d50031e2}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{issn}{2076-3417}
+      \field{journaltitle}{Applied Sciences}
+      \field{number}{12}
+      \field{title}{A Systematic Literature Review on Penetration Testing in Networks: Future Research Directions}
+      \field{volume}{13}
+      \field{year}{2023}
+      \verb{doi}
+      \verb 10.3390/app13126986
+      \endverb
+      \verb{urlraw}
+      \verb https://www.mdpi.com/2076-3417/13/12/6986
+      \endverb
+      \verb{url}
+      \verb https://www.mdpi.com/2076-3417/13/12/6986
+      \endverb
+    \endentry
+    \entry{GetPwnd2023}{inproceedings}{}
+      \name{author}{2}{}{%
+        {{hash=5428f06025d7c2bb1887049ae27f6d48}{%
+           family={Happe},
+           familyi={H\bibinitperiod},
+           given={Andreas},
+           giveni={A\bibinitperiod}}}%
+        {{hash=232be5855be8eff710c726b964bf176f}{%
+           family={Cito},
+           familyi={C\bibinitperiod},
+           given={Jürgen},
+           giveni={J\bibinitperiod}}}%
+      }
+      \list{location}{1}{%
+        {San Francisco, CA, USA}%
+      }
+      \list{publisher}{1}{%
+        {Association for Computing Machinery}%
+      }
+      \strng{namehash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \strng{fullhash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \strng{bibnamehash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \strng{authorbibnamehash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \strng{authornamehash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \strng{authorfullhash}{928d41ca3290bd660eea2f7fea6fc06e}
+      \field{sortinit}{H}
+      \field{sortinithash}{23a3aa7c24e56cfa16945d55545109b5}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{isbn}{9798400703270}
+      \field{series}{ESEC/FSE 2023}
+      \field{title}{Getting pwn’d by AI: Penetration Testing with Large Language Models}
+      \field{year}{2023}
+      \field{pages}{2082\bibrangedash 2086}
+      \range{pages}{5}
+      \verb{doi}
+      \verb 10.1145/3611643.3613083
+      \endverb
+      \verb{urlraw}
+      \verb https://doi.org/10.1145/3611643.3613083
+      \endverb
+      \verb{url}
+      \verb https://doi.org/10.1145/3611643.3613083
+      \endverb
+      \keyw{large language models,penetration testing,security testing}
+    \endentry
+    \entry{j2024finetuningllmenterprise}{misc}{}
+      \name{author}{4}{}{%
+        {{hash=42d198cdb9c8c0efe6c8909c652212da}{%
+           family={J},
+           familyi={J\bibinitperiod},
+           given={Mathav\bibnamedelima Raj},
+           giveni={M\bibinitperiod\bibinitdelim R\bibinitperiod}}}%
+        {{hash=6c20ba8835f2b9b0e4c1549ac93cc5e5}{%
+           family={VM},
+           familyi={V\bibinitperiod},
+           given={Kushala},
+           giveni={K\bibinitperiod}}}%
+        {{hash=48618b6c6f10cd866691535d675ed785}{%
+           family={Warrier},
+           familyi={W\bibinitperiod},
+           given={Harikrishna},
+           giveni={H\bibinitperiod}}}%
+        {{hash=d2b835be2efe51d5ff491a35a7846557}{%
+           family={Gupta},
+           familyi={G\bibinitperiod},
+           given={Yogesh},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{f05bce0fc3d674451ac9fd2f4721df03}
+      \strng{fullhash}{88855206466d197662e3297d6afc8c5a}
+      \strng{bibnamehash}{f05bce0fc3d674451ac9fd2f4721df03}
+      \strng{authorbibnamehash}{f05bce0fc3d674451ac9fd2f4721df03}
+      \strng{authornamehash}{f05bce0fc3d674451ac9fd2f4721df03}
+      \strng{authorfullhash}{88855206466d197662e3297d6afc8c5a}
+      \field{sortinit}{J}
+      \field{sortinithash}{b2f54a9081ace9966a7cb9413811edb4}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.SE}
+      \field{eprinttype}{arXiv}
+      \field{title}{Fine Tuning LLM for Enterprise: Practical Guidelines and Recommendations}
+      \field{year}{2024}
+      \verb{eprint}
+      \verb 2404.10779
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2404.10779
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2404.10779
+      \endverb
+    \endentry
+    \entry{nmap_docs}{misc}{}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labeltitlesource}{title}
+      \field{title}{Nmap Documentation}
+      \verb{urlraw}
+      \verb https://nmap.org/docs.html
+      \endverb
+      \verb{url}
+      \verb https://nmap.org/docs.html
+      \endverb
+    \endentry
+    \entry{nvdlib_docs}{misc}{}
+      \field{sortinit}{N}
+      \field{sortinithash}{22369a73d5f88983a108b63f07f37084}
+      \field{labeltitlesource}{title}
+      \field{title}{Nvdlib Documentation}
+      \verb{urlraw}
+      \verb https://nvdlibdocs.readthedocs.io/en/latest/
+      \endverb
+      \verb{url}
+      \verb https://nvdlibdocs.readthedocs.io/en/latest/
+      \endverb
+    \endentry
+    \entry{Princess_Egbuna_2021}{article}{}
+      \name{author}{1}{}{%
+        {{hash=93eccd9659d7df004fa968cea5db9b72}{%
+           family={Princess\bibnamedelima Egbuna},
+           familyi={P\bibinitperiod\bibinitdelim E\bibinitperiod},
+           given={Oluebube},
+           giveni={O\bibinitperiod}}}%
+      }
+      \strng{namehash}{93eccd9659d7df004fa968cea5db9b72}
+      \strng{fullhash}{93eccd9659d7df004fa968cea5db9b72}
+      \strng{bibnamehash}{93eccd9659d7df004fa968cea5db9b72}
+      \strng{authorbibnamehash}{93eccd9659d7df004fa968cea5db9b72}
+      \strng{authornamehash}{93eccd9659d7df004fa968cea5db9b72}
+      \strng{authorfullhash}{93eccd9659d7df004fa968cea5db9b72}
+      \field{sortinit}{P}
+      \field{sortinithash}{ff3bcf24f47321b42cb156c2cc8a8422}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{journaltitle}{Journal of Science Technology}
+      \field{number}{2}
+      \field{title}{The Impact of AI on Cybersecurity: Emerging Threats and Solutions}
+      \field{volume}{2}
+      \field{year}{2021}
+      \field{pages}{43\bibrangedash 67}
+      \range{pages}{25}
+      \verb{urlraw}
+      \verb https://nucleuscorp.org/jst/article/view/232
+      \endverb
+      \verb{url}
+      \verb https://nucleuscorp.org/jst/article/view/232
+      \endverb
+    \endentry
+    \entry{dataset}{misc}{}
+      \name{author}{1}{}{%
+        {{hash=741a52f0af875a4303beffb3ac92704d}{%
+           family={Trento\bibnamedelimb -\bibnamedelima Italy},
+           familyi={T\bibinitperiod\bibinitdelim \bibinithyphendelim \bibinitperiod\bibinitdelim I\bibinitperiod},
+           given={University},
+           giveni={U\bibinitperiod},
+           prefix={of},
+           prefixi={o\bibinitperiod}}}%
+      }
+      \strng{namehash}{741a52f0af875a4303beffb3ac92704d}
+      \strng{fullhash}{741a52f0af875a4303beffb3ac92704d}
+      \strng{bibnamehash}{741a52f0af875a4303beffb3ac92704d}
+      \strng{authorbibnamehash}{741a52f0af875a4303beffb3ac92704d}
+      \strng{authornamehash}{741a52f0af875a4303beffb3ac92704d}
+      \strng{authorfullhash}{741a52f0af875a4303beffb3ac92704d}
+      \field{sortinit}{T}
+      \field{sortinithash}{9af77f0292593c26bde9a56e688eaee9}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{title}{Datasets on Security Research at the University of Trento}
+      \field{year}{2021}
+      \verb{urlraw}
+      \verb https://securitylab.disi.unitn.it/doku.php?id=datasets
+      \endverb
+      \verb{url}
+      \verb https://securitylab.disi.unitn.it/doku.php?id=datasets
+      \endverb
+    \endentry
+    \entry{YAO2024100211}{article}{}
+      \name{author}{6}{}{%
+        {{hash=9f7b4172b9a33591fe632aedb07afee7}{%
+           family={Yao},
+           familyi={Y\bibinitperiod},
+           given={Yifan},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=69b14c6e879d016b5dc7ca129f5b5c1c}{%
+           family={Duan},
+           familyi={D\bibinitperiod},
+           given={Jinhao},
+           giveni={J\bibinitperiod}}}%
+        {{hash=019109ff4c9ff96b9017a5fe4dfacdcd}{%
+           family={Xu},
+           familyi={X\bibinitperiod},
+           given={Kaidi},
+           giveni={K\bibinitperiod}}}%
+        {{hash=9703875b48aca55a8b8132ab09725f1e}{%
+           family={Cai},
+           familyi={C\bibinitperiod},
+           given={Yuanfang},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=0b477b2988f2ee525bd08b756d897fe7}{%
+           family={Sun},
+           familyi={S\bibinitperiod},
+           given={Zhibo},
+           giveni={Z\bibinitperiod}}}%
+        {{hash=b8238061b3c805be2a30dd55bb11fb21}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Yue},
+           giveni={Y\bibinitperiod}}}%
+      }
+      \strng{namehash}{656e13e1a1076315682f0a8605c3d609}
+      \strng{fullhash}{24d216b5b62b903ce2c1a12fcea8ec85}
+      \strng{bibnamehash}{656e13e1a1076315682f0a8605c3d609}
+      \strng{authorbibnamehash}{656e13e1a1076315682f0a8605c3d609}
+      \strng{authornamehash}{656e13e1a1076315682f0a8605c3d609}
+      \strng{authorfullhash}{24d216b5b62b903ce2c1a12fcea8ec85}
+      \field{sortinit}{Y}
+      \field{sortinithash}{fd67ad5a9ef0f7456bdd9aab10fe1495}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{abstract}{Large Language Models (LLMs), such as ChatGPT and Bard, have revolutionized natural language understanding and generation. They possess deep language comprehension, human-like text generation capabilities, contextual awareness, and robust problem-solving skills, making them invaluable in various domains (e.g., search engines, customer support, translation). In the meantime, LLMs have also gained traction in the security community, revealing security vulnerabilities and showcasing their potential in security-related tasks. This paper explores the intersection of LLMs with security and privacy. Specifically, we investigate how LLMs positively impact security and privacy, potential risks and threats associated with their use, and inherent vulnerabilities within LLMs. Through a comprehensive literature review, the paper categorizes the papers into “The Good” (beneficial LLM applications), “The Bad” (offensive applications), and “The Ugly” (vulnerabilities of LLMs and their defenses). We have some interesting findings. For example, LLMs have proven to enhance code security (code vulnerability detection) and data privacy (data confidentiality protection), outperforming traditional methods. However, they can also be harnessed for various attacks (particularly user-level attacks) due to their human-like reasoning abilities. We have identified areas that require further research efforts. For example, Research on model and parameter extraction attacks is limited and often theoretical, hindered by LLM parameter scale and confidentiality. Safe instruction tuning, a recent development, requires more exploration. We hope that our work can shed light on the LLMs’ potential to both bolster and jeopardize cybersecurity.}
+      \field{issn}{2667-2952}
+      \field{journaltitle}{High-Confidence Computing}
+      \field{number}{2}
+      \field{title}{A survey on large language model (LLM) security and privacy: The Good, The Bad, and The Ugly}
+      \field{volume}{4}
+      \field{year}{2024}
+      \verb{doi}
+      \verb https://doi.org/10.1016/j.hcc.2024.100211
+      \endverb
+      \verb{urlraw}
+      \verb https://www.sciencedirect.com/science/article/pii/S266729522400014X
+      \endverb
+      \verb{url}
+      \verb https://www.sciencedirect.com/science/article/pii/S266729522400014X
+      \endverb
+      \keyw{Large Language Model (LLM),LLM security,LLM privacy,ChatGPT,LLM attacks,LLM vulnerabilities}
+    \endentry
+    \entry{zhang2024llmsmeetcybersecuritysystematic}{article}{}
+      \name{author}{10}{}{%
+        {{hash=2f4cc163c8766d4437008ea260208de8}{%
+           family={Zhang},
+           familyi={Z\bibinitperiod},
+           given={Jie},
+           giveni={J\bibinitperiod}}}%
+        {{hash=f10255222a583265c7c44e6767feba72}{%
+           family={Bu},
+           familyi={B\bibinitperiod},
+           given={Haoyu},
+           giveni={H\bibinitperiod}}}%
+        {{hash=bed3f6828a43f72d85f38e42ea2bf779}{%
+           family={Wen},
+           familyi={W\bibinitperiod},
+           given={Hui},
+           giveni={H\bibinitperiod}}}%
+        {{hash=2a80d1b7c62989e58297c09516782c0e}{%
+           family={Liu},
+           familyi={L\bibinitperiod},
+           given={Yongji},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=b88b7129c3d67bd78115832dc940d80d}{%
+           family={Fei},
+           familyi={F\bibinitperiod},
+           given={Haiqiang},
+           giveni={H\bibinitperiod}}}%
+        {{hash=44ab5b5cb8e9050c2444d3c796499246}{%
+           family={Xi},
+           familyi={X\bibinitperiod},
+           given={Rongrong},
+           giveni={R\bibinitperiod}}}%
+        {{hash=58945d65fbf17b2fa515a0629693ce84}{%
+           family={Li},
+           familyi={L\bibinitperiod},
+           given={Lun},
+           giveni={L\bibinitperiod}}}%
+        {{hash=83d8c1a36f3dec2cbd7fdc704910f74c}{%
+           family={Yang},
+           familyi={Y\bibinitperiod},
+           given={Yun},
+           giveni={Y\bibinitperiod}}}%
+        {{hash=83babd6f36cae5ed79ab147c1781d105}{%
+           family={Zhu},
+           familyi={Z\bibinitperiod},
+           given={Hongsong},
+           giveni={H\bibinitperiod}}}%
+        {{hash=bc1037b747eef67ee03c51664e3823a5}{%
+           family={Meng},
+           familyi={M\bibinitperiod},
+           given={Dan},
+           giveni={D\bibinitperiod}}}%
+      }
+      \strng{namehash}{7cf8eaf74a2659f76a70a943f2d3282a}
+      \strng{fullhash}{c1933e6af88a0ea32c4a1b05448de0d1}
+      \strng{bibnamehash}{7cf8eaf74a2659f76a70a943f2d3282a}
+      \strng{authorbibnamehash}{7cf8eaf74a2659f76a70a943f2d3282a}
+      \strng{authornamehash}{7cf8eaf74a2659f76a70a943f2d3282a}
+      \strng{authorfullhash}{c1933e6af88a0ea32c4a1b05448de0d1}
+      \field{sortinit}{Z}
+      \field{sortinithash}{96892c0b0a36bb8557c40c49813d48b3}
+      \field{labelnamesource}{author}
+      \field{labeltitlesource}{title}
+      \field{eprintclass}{cs.CR}
+      \field{eprinttype}{arXiv}
+      \field{title}{When LLMs Meet Cybersecurity: A Systematic Literature Review}
+      \field{year}{2024}
+      \verb{eprint}
+      \verb 2405.03644
+      \endverb
+      \verb{urlraw}
+      \verb https://arxiv.org/abs/2405.03644
+      \endverb
+      \verb{url}
+      \verb https://arxiv.org/abs/2405.03644
+      \endverb
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+

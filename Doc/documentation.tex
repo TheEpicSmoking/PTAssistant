@@ -1,0 +1,234 @@
+\documentclass[11pt]{article}
+
+\title{AI PenTesting Suite}
+\usepackage{graphicx}
+\usepackage[utf8]{inputenc}
+\usepackage{hyperref}
+\usepackage{float}
+\usepackage{bookmark}
+\usepackage[left=2.5cm, right=2.5cm, top=2.5cm, bottom=2.5cm]{geometry}
+\usepackage{titlesec}
+\usepackage[backend=biber]{biblatex}
+\usepackage{tocloft} % Optional: to customize TOC appearance
+
+% Redefine paragraph to behave like a subsection for TOC purposes
+\titleformat{\paragraph}
+  [runin] % Keep the paragraph style without line break
+  {\normalfont\normalsize\bfseries} % Style
+  {\theparagraph} % Numbering style
+  {1em}
+  {}
+
+\titlespacing*{\paragraph}{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+
+\setcounter{secnumdepth}{4}
+\setcounter{tocdepth}{4}
+\author{Alessandro Luppino}
+
+\addbibresource{references.bib}
+
+\begin{document}
+\begin{titlepage}
+   \begin{center}
+       \vspace*{1cm}
+       \vspace{0.5cm}
+        {\huge Analisi e documentazione del progetto}
+       \begin{figure}[H]
+    		\centering
+    		\includegraphics[width=0.8\textwidth]{../Resources/Icon/AIPS_Icon2B.png}
+    \end{figure}
+       \vspace{0.5cm}
+
+       \textbf{Alessandro Luppino}
+
+       \vfill
+            
+       Politecnico di Bari\\
+       Ingegneria del Software
+            
+       \vspace{0.1cm}
+   \end{center}
+\end{titlepage}
+\tableofcontents
+\newpage
+\section{Introduzione}
+Il progetto consiste nello sviluppo di una chat da terminale per sistemi Linux, 
+che consente di interagire con un modello linguistico avanzato (LLM)\autocite{YAO2024100211}, 
+appositamente integrato con strumenti di sicurezza esistenti.\\
+L'obiettivo principale è l'applicazione del modello di intelligenza artificiale 
+nell'ambito della cybersecurity, con lo scopo di assistere l'utente nella prima 
+fase di penetration testing\autocite{app13126986} fornendo un'esperienza interattiva.\\
+\section{Contesto e stato dell'arte}
+Nel panorama attuale della cybersecurity, l’intelligenza artificiale ha assunto un
+ruolo sempre più centrale\autocite{Princess_Egbuna_2021}\autocite{zhang2024llmsmeetcybersecuritysystematic}, con modelli avanzati che supportano analisi delle minacce, 
+rilevamento delle vulnerabilità e simulazioni di attacchi\autocite{GetPwnd2023}. Molte soluzioni disponibili 
+sul mercato fanno uso di modelli altamente specializzati, addestrati su dataset specifici 
+relativi alla sicurezza informatica, che garantiscono performance ottimizzate. 
+Tuttavia, questi strumenti presentano spesso delle limitazioni, come la necessità 
+di accedere a servizi remoti, restrizioni nel numero di richieste effettuabili e costi 
+associati all’uso di modelli complessi.\\
+\textbf{AI PenTesting Suite} si inserisce in questo contesto differenziandosi 
+dai tradizionali servizi AI in quanto prevede l'hosting del modello sulla macchina dell'utente 
+(di consueto si utilizza un'architettura Client-Server), e l'integrazione con strumenti di cybersecurity affermati.
+\section{Requisiti}
+\subsection{Funzionali}
+\begin{itemize}
+    \item \textbf{Interfaccia conversazionale: }il sistema deve consentire agli utenti di interagire tramite una chat da terminale.
+    \item \textbf{Scansione delle vulnerabilità: }deve eseguire scansioni delle infrastrutture IT utilizzando strumenti come Nmap e analizzarne i risultati per identificare vulnerabilità, assegnando un livello di rischio.
+    \item \textbf{Ricerca delle vulnerabilità: }deve consentire agli utenti di cercare informazioni su vulnerabilità specifiche, restituendo dettagli e suggerimenti.
+\end{itemize}
+\subsection{Non Funzionali}
+\begin{itemize}
+    \item \textbf{Prestazioni: }il sistema deve elaborare i dati di una scansione e generare risposte in tempi ragionevoli.
+    \item \textbf{Scalabilità: }deve essere facilmente estendibile per includere nuove integrazioni.
+    \item \textbf{Usabilità: }l’output deve essere chiaro e diretto.
+    \item \textbf{Affidabilità: }il sistema deve fornire risultati accurati relativi alle vulnerabilità rilevate.
+\end{itemize}
+\section{Modello di processo}
+Il progetto è stato sviluppato seguendo un approccio iterativo e incrementale, 
+integrato con una chiara definizione dei requisiti funzionali e non funzionali. 
+Questo approccio si è rivelato efficace per affrontare lo sviluppo di un sistema complesso, 
+che è stato suddiviso in moduli per facilitare il testing durante lo sviluppo e gli aggiornamenti futuri. 
+L’iterazione costante ha permesso di soddisfare i requisiti specificati in modo graduale, 
+garantendo un miglioramento continuo e un risultato stabile.
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{../Resources/Diagrams/Gantt.png}
+    Il Gantt iniziale del progetto.
+\end{figure}
+\section{Analisi dei Costi} \label{AdC}
+I risultati di questa analisi sono quelli che hanno determinato le scelte che verranno poi discusse.
+\subsection{Hosting del modello} \label{HdM}
+L’hosting di un modello da 1.5B parametri su una piattaforma come \href{https://huggingface.co/spaces}{Hugging Face Spaces} 
+richiede risorse significative per garantire prestazioni accettabili durante le interazioni: 
+almeno una GPU con 16-24 GB di memoria per essere caricato e mantenere tempi di risposta adeguati.\\
+\href{https://huggingface.co/spaces}{Hugging Face Spaces} offre un piano gratuito, ma con risorse limitate, 
+non adatte a modelli di questa scala. Questo è stato verificato durante i test, 
+dove il sistema risultava così lento da essere inutilizzabile.\\\\
+Per accedere a risorse adeguate, è quindi necessario un piano premium o l’uso di servizi cloud 
+come \href{https://aws.amazon.com/it/}{AWS}, \href{https://cloud.google.com/}{Google Cloud} o 
+\href{https://portal.azure.com/}{Azure}.\\
+su \href{https://huggingface.co/spaces}{Hugging Face Spaces}, un'istanza GPU T4 dedicata costa circa \$0.60-\$1.00 all'ora, 
+mentre un'istanza con una GPU A100 (più adatta per i carichi richiesti dal 
+progetto) può salire a \$2.00-\$4.00 all'ora.\\
+Supponendo un utilizzo continuo di 24 ore al giorno in modo che il modello sia sempre disponibile, 
+i costi variano da \$432 a \$2880 al mese a seconda delle risorse selezionate.\\
+\textit{NOTA: Ci sono alternative più economiche di quella analizzata,
+piattaforme come Google Colab Pro+ o Paperspace offrono GPU a tariffe ridotte, 
+ma la scalabilità e la disponibilità per un’applicazione a lungo termine restano 
+problematiche e l'hosting su uno di questi servizi è troppo dispendioso.}
+\newpage
+\subsection{Fine-tuning del modello}
+\subsubsection{In locale}
+Il fine-tuning di un modello da 1.5B parametri è un processo computazionalmente intenso
+che richiede hardware e risorse software specifiche\autocite{j2024finetuningllmenterprise}:
+\begin{itemize}
+    \item \textbf{GPU con almeno 24 GB di VRAM:} quantità minima necessaria per 
+    gestire il training in batch ragionevoliS.
+    \item \textbf{CPU potente:} per gestire il pre-processing dei dati e il training in parallelo.
+    \item \textbf{Ampio spazio di archiviazione:} per caricare dataset e checkpoint intermedi.
+\end{itemize}
+La mia macchina non soddisfa nessuno di questi requisiti, e l’acquisto di hardware dedicato per il fine-tuning comporterebbe spese troppo elevate.\\
+\textit{NOTA: Anche se fosse possibile suddividere i batch per adattarsi a una GPU con meno memoria, 
+i tempi di elaborazione crescerebbero esponenzialmente, rendendo il processo impraticabile.}
+\subsubsection{In Cloud}
+Un'alternativa più economica per il fine-tuning sono le stesse piattaforme Cloud discusse nell'hosting del modello \ref{HdM}.
+Il training completo di un modello da 1.5B parametri può richiedere sulle 48-72 ore di calcolo 
+su una GPU V100. Un’istanza GPU V100 su \href{https://aws.amazon.com/it/}{AWS} costa circa \$2.50-\$3.00 all’ora, 
+mentre una GPU A100 può costare fino a \$4.00-\$5.00 all’ora.
+Il costo totale varia quindi da \$120 a \$360 per il fine-tuning 
+(escludendo costi per archiviazione e trasferimento dati).\\
+\textit{NOTA: il fine-tuning richiede anche dataset specifici e pre-elaborati, il che aggiunge tempo e possibili costi.}
+\section{Problemi riscontrati e Scelte tecniche}
+Uno dei principali problemi affrontati durante lo sviluppo del progetto, è stata 
+l’impossibilità tecnica di effettuare il fine-tuning del modello AI su dati 
+specifici del dominio della cybersecurity\autocite{dataset}. Questo limite, 
+legato principalmente a risorse computazionali insufficienti e a costi elevati \ref{AdC}, 
+ha portato a scegliere un modello general-purpose già pre-addestrato, 
+accettando compromessi in termini di specificità delle risposte.\\
+Per mitigare gli effetti negativi di questa scelta e le "allucinazioni" tipiche di qualsiasi
+LLM, il sistema è stato, attualmente, integrato con:
+\begin{itemize}
+    \item \textbf{nmap\autocite{nmap_docs}}: per effettuare scansioni di reti e porte, fornendo dettagli utili per valutazioni di sicurezza.
+    \item \textbf{nvdilb\autocite{nvdlib_docs}}: una libreria python per interagire con il \href{https://nvd.nist.gov/}{NVD (National Vulnerability Database)}, permettendo la ricerca e il controllo di eventuali CVE (Common Vulnerabilities and Exposures) associate ai servizi.
+\end{itemize}
+E prevede l'integrazione di ulteriori strumenti in futuro. (vedi Sviluppi Futuri)\\
+Queste integrazioni permette di compensare la mancanza di conoscenza specifica del modello, 
+migliorando l'accuratezza, l'affidabilità e la ripetibilità delle risposte.\\
+Un altro aspetto distintivo del progetto è il prima citato hosting locale sulla macchina dell’utente, 
+che garantisce piena autonomia e libertà di utilizzo del sistema senza restrizioni. 
+Tuttavia, questa scelta comporta un aumento del carico computazionale sulla macchina stessa, 
+richiedendo un compromesso tra performance del sistema e risorse disponibili. 
+La decisione di privilegiare un’architettura locale, oltre a fornire una soluzione completamente 
+gratuita, riflette l’obiettivo di creare uno strumento flessibile, 
+senza dipendenze da infrastrutture esterne, adatto a scenari dove 
+la privacy e la disponibilità del modello giocano un ruolo critico.\\
+\textit{Ad Es. è possibile conversare con il modello anche in assenza di connessione internet seppure 
+si svanno a sacrificare alcune funzionalità.}
+\section{Prototipo}
+Il primo prototipo del progetto è stato presentato in data 29/11/2024.\\ 
+In questa fase, il sistema implementava le funzionalità di base, soddisfacendo parzialmente 
+i requisiti funzionali e non funzionali precedentemente definiti. Il prototipo era già operativo
+e in grado di svolgere alcune funzionalità più complesse come la scansione di reti tramite Nmap.
+Il problema principale riscontrato è stato il tempo di risposta del modello, soprattutto durante le scansioni
+i tempi di attesa superavano il minuto, rendendo l'esperienza utente non ottimale.\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{../Resources/Diagrams/CasiDUso.jpg}
+    Il diagramma dei casi d'uso seguito anche dal prototipo.
+\end{figure}
+\section{Stato Attuale}
+Dopo aver analizzato attentamente i limiti del prototipo, sono state effettuate numerose migliorie
+all'esperienza utente, tra cui un'interfaccia grafica molto più pulita che permette
+al modello di formattare le risposte, l'aggiunta di un sistema di cronologia in modo che l'utente
+possa automaticamente ripetere comandi passati più facilmente, e la completa rivisitazione del
+sistema che gestiva l'input e l'output del modello, per permette di vedere in tempo reale i messaggi
+del modello, riducendo notevolmente i tempi di attesa.\\
+Oltre a questo sono state aggiunte nuove funzionalità come la ricerca di CVE tramite NVD e resa più
+efficace l'integrazione con nmap.\\
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{../Resources/Diagrams/Architettura.jpg}
+\end{figure}
+\begin{figure}[H]
+    \centering
+    \includegraphics[width=1\textwidth]{../Resources/Diagrams/Sequenze.jpg}
+    Architettura e diagramma delle sequenze della versione finale del progetto.
+\end{figure}
+
+\section{Sviluppi Futuri}
+Gli sviluppi futuri del progetto mirano a potenziarne ulteriormente le funzionalità e 
+migliorare l’esperienza utente.
+È previsto l’aggiungimento di nuovi moduli, come un Modulo 
+di Attacco, che suggerirà exploit e tecniche di attacco specifiche per le vulnerabilità 
+rilevate, e un Modulo di Report, capace di generare report dettagliati e professionali 
+utili per la documentazione del lavoro svolto.\\
+Inoltre, si intende implementare un sistema per salvare le conversazioni e consentire agli 
+utenti di riprenderle in futuro, garantendo continuità nelle analisi.\\
+Sul fronte dell’usabilità, lo sviluppo di un’interfaccia grafica più intuitiva rappresenta 
+una priorità, insieme a funzionalità che migliorino l’interazione, come la possibilità di 
+interrompere il modello durante la generazione di output non soddisfacenti.\\
+Infine, se i fondi lo permetteranno, si prevede di effettuare il fine-tuning del modello AI. 
+Questo consentirebbe di adattare il sistema a scenari specifici della cybersecurity, 
+migliorandone la precisione e riducendo ulteriormente il rischio di allucinazioni.
+\\
+\\
+\section*{Stack Tecnico}
+
+Il modello utilizzato per il progetto è \href{https://huggingface.co/Qwen/Qwen2.5-1.5B-Instruct}{\texttt{Qwen2.5-1.5B-Instruct}}, un modello AI general-purpose con 1.5 miliardi di parametri, scelto per le sue capacità avanzate di generazione e comprensione del linguaggio naturale. Lo sviluppo è stato effettuato in Python, versione \texttt{3.12.8}, con il supporto delle seguenti librerie:
+
+\begin{itemize}
+    \item \texttt{json}, \texttt{time}, \texttt{os}, \texttt{re}, \texttt{socket}: per la gestione di operazioni di base del sistema e manipolazione dei dati.
+    \item \texttt{nvdlib}, \texttt{nmap}, \texttt{whois}: per l'integrazione con strumenti e librerie di cybersecurity.
+    \item \texttt{prompt\_toolkit} (moduli: \texttt{PromptSession}, \texttt{HTML}, \texttt{KeyBindings}, \texttt{FileHistory}, \texttt{run\_in\_terminal}, \texttt{AutoSuggestFromHistory}): per implementare l'interfaccia conversazionale interattiva.
+    \item \texttt{rich} (moduli: \texttt{Console}, \texttt{Live}, \texttt{Markdown}, \texttt{Spinner}): per fornire un output visuale avanzato e leggibile.
+    \item \texttt{threading.Thread}: per gestire l'esecuzione di task concorrenti.
+    \item \texttt{transformers} (moduli: \texttt{AutoTokenizer}, \texttt{AutoModelForCausalLM}, \texttt{TextIteratorStreamer}): per il caricamento e l'interazione con il modello AI.
+    \item \texttt{torch} (\textit{PyTorch}): come backend per il machine learning, necessario per il funzionamento del modello.
+\end{itemize}
+
+Test e sviluppo sono stati eseguiti su una macchina con \texttt{AMD Ryzen 5 7535U} e \texttt{16 GB} di RAM.
+
+\newpage
+\printbibliography
+\end{document}
